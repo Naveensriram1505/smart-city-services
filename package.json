@@ -1,0 +1,22 @@
+{
+  "name": "smart-city-services",
+  "version": "1.0.0",
+  "description": "Smart City Services — Citizen Portal (HTML/CSS/JS + Firebase, Python backend, wrapped for Android via Capacitor)",
+  "private": true,
+  "scripts": {
+    "sync": "npx cap sync",
+    "open": "npx cap open android",
+    "build-android": "npx cap sync android && npx cap open android"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.1.0",
+    "@capacitor/geolocation": "^6.0.1",
+    "@capacitor/camera": "^6.0.2",
+    "@capacitor/share": "^6.0.2",
+    "@capacitor-firebase/authentication": "^6.1.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.0",
+    "@capacitor/android": "^6.1.0"
+  }
+}

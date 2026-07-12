@@ -1,0 +1,18 @@
+{
+  "appId": "com.smartcity.services",
+  "appName": "Smart City Services",
+  "webDir": "frontend/www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#0B2B6B"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0,
+      "backgroundColor": "#0B2B6B"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+node_modules/
+# android/
+# www/
+dist/
+.DS_Store
+
+backend/venv/
+backend/__pycache__/
+backend/.env
+*.pyc
+
+*.log
+.env
+
+backend/service-account.json
+backend/smartcity.db
+backend/uploads/
