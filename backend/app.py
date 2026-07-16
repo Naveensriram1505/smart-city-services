@@ -246,6 +246,7 @@ def _weather_code_to_icon(code):
 INTENTS = [
     (r"hospital|clinic|doctor", "The Nearby screen lists hospitals and clinics around you with distance and directions — tap the Hospitals tile on Home, or ask me for a specific area."),
     (r"bus|route \d+", "Check the Transport screen for live bus routes and ETAs. Route 12 is currently 4 minutes out from Market Square, for example."),
+    (r"company|companies|organization|organizations|vendor|vendors|supplier|suppliers", "For company-related services, I can help you find nearby public service providers, municipal offices, or city vendor support. Ask for the department or service type you need, like water, electricity, or waste collection."),
     (r"traffic|congestion|accident|road closed|closure", "The Traffic screen shows live congestion by road segment and flags accidents or closures, with an alternative-route button where relevant."),
     (r"garbage|waste.*(schedule|collection|pickup)|trash", "Waste collection typically runs Monday, Wednesday and Friday mornings for household waste — check the City News screen for your ward's exact schedule, and use the Waste Classifier to sort an item correctly."),
     (r"water supply|water timing|water schedule", "Water supply timings vary by ward — check City News for maintenance notices, or file a Water Supply complaint from Home if you're facing an outage."),
@@ -272,6 +273,35 @@ def chat():
         reply = _ask_gemini(message)
         if reply:
             return jsonify({"reply": reply})
+
+    # Fallback: Query the DocSage RAG server if it is active
+    try:
+        import requests
+        docsage_resp = requests.post(
+            "http://127.0.0.1:8000/query",
+            json={"question": message},
+            timeout=5
+        )
+        if docsage_resp.status_code == 200:
+            data = docsage_resp.json()
+            answer = data.get("answer", "")
+            # Check if we got a real generated response
+            if "API key configured" not in answer:
+                return jsonify({"reply": answer})
+            else:
+                # If keys are missing, extract the top retrieved excerpts and show them nicely
+                chunks = data.get("retrieved_chunks", [])
+                if chunks:
+                    excerpts = []
+                    for c in chunks[:2]:
+                        excerpts.append(f"📄 **From {c['source']}**:\n\"{c['text']}\"")
+                    reply = (
+                        "I found some relevant details in the local city documentation:\n\n"
+                        + "\n\n".join(excerpts)
+                    )
+                    return jsonify({"reply": reply})
+    except Exception as e:
+        print(f"[chat] DocSage RAG query failed/unreachable: {e}")
 
     return jsonify({"reply": "I don't have a specific answer for that yet — try asking about hospitals, bus/metro timings, traffic, waste collection, water supply, electricity complaints, government schemes, tourist spots, or emergency services."})
 
@@ -372,5 +402,111 @@ def _classify_heuristic(img):
     return category, round(confidence, 2)
 
 
+
+# --------------------------------------------------------------------------
+# Complaints — SQLite-backed (no Firebase required)
+#
+# Table auto-created on first run at backend/smartcity.db
+# Fields: id, name, phone, problem_type, description, location, status, created_at
+# --------------------------------------------------------------------------
+import sqlite3
+from datetime import datetime
+
+DB_PATH = os.path.join(os.path.dirname(__file__), "smartcity.db")
+
+PROBLEM_TYPES = [
+    "Road Damage",
+    "Garbage Overflow",
+    "Water Leakage",
+    "Streetlight Failure",
+    "Illegal Parking",
+    "Drainage Problem",
+    "Air Pollution",
+    "Noise Pollution",
+    "Power Outage",
+    "Sewage Issue",
+    "Park / Public Space",
+    "Other",
+]
+
+
+def get_db():
+    """Open a SQLite connection and ensure the complaints table exists."""
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS complaints (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            name        TEXT    NOT NULL,
+            phone       TEXT    NOT NULL,
+            problem_type TEXT   NOT NULL,
+            description TEXT    NOT NULL,
+            location    TEXT    NOT NULL DEFAULT '',
+            status      TEXT    NOT NULL DEFAULT 'open',
+            created_at  TEXT    NOT NULL
+        )
+    """)
+    conn.commit()
+    return conn
+
+
+@app.get("/api/complaints")
+def list_complaints():
+    """Return all complaints ordered newest first."""
+    try:
+        conn = get_db()
+        rows = conn.execute(
+            "SELECT * FROM complaints ORDER BY id DESC"
+        ).fetchall()
+        conn.close()
+        return jsonify({
+            "ok": True,
+            "complaints": [dict(r) for r in rows],
+        })
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.post("/api/complaints")
+def create_complaint():
+    """Create a new complaint.
+
+    Expected JSON body:
+      { name, phone, problem_type, description, location }
+    """
+    body = request.get_json(silent=True) or {}
+    name         = (body.get("name") or "").strip()
+    phone        = (body.get("phone") or "").strip()
+    problem_type = (body.get("problem_type") or "").strip()
+    description  = (body.get("description") or "").strip()
+    location     = (body.get("location") or "").strip()
+
+    if not name or not phone or not problem_type or not description:
+        return jsonify({"ok": False, "error": "name, phone, problem_type and description are required"}), 400
+
+    created_at = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    try:
+        conn = get_db()
+        cur = conn.execute(
+            "INSERT INTO complaints (name, phone, problem_type, description, location, status, created_at) "
+            "VALUES (?, ?, ?, ?, ?, 'open', ?)",
+            (name, phone, problem_type, description, location, created_at),
+        )
+        conn.commit()
+        row_id = cur.lastrowid
+        row = conn.execute("SELECT * FROM complaints WHERE id=?", (row_id,)).fetchone()
+        conn.close()
+        return jsonify({"ok": True, "complaint": dict(row)}), 201
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.get("/api/complaints/problem-types")
+def complaint_problem_types():
+    """Return the list of recognised problem types."""
+    return jsonify({"ok": True, "types": PROBLEM_TYPES})
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
+

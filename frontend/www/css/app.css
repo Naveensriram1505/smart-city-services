@@ -441,3 +441,180 @@ h1,h2,h3 { font-family: var(--font-display); margin:0; letter-spacing:-0.01em; }
 }
 
 @media (max-width:340px) { .service-grid { grid-template-columns: repeat(3,1fr); } }
+
+/* ────────────────────────────────────────────────────────────
+   Complaint pages — form + list
+   ──────────────────────────────────────────────────────────── */
+
+/* Spinning loader utility */
+.spin-icon { animation: spin 0.9s linear infinite; }
+
+/* ── List header ── */
+.complaint-list-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; margin-bottom: 14px;
+}
+.complaint-list-info {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 12.5px; color: var(--text-faint);
+}
+.complaint-list-info i { width: 14px; height: 14px; }
+
+.btn-sm { padding: 8px 14px; font-size: 12.5px; gap: 5px; }
+.btn-sm i { width: 14px; height: 14px; }
+
+/* ── Complaint card ── */
+.complaint-card { margin-bottom: 12px; }
+.complaint-card-top {
+  display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px;
+}
+.complaint-icon-wrap {
+  width: 40px; height: 40px; flex: 0 0 40px;
+  border-radius: var(--r-sm);
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+}
+.complaint-icon-wrap i { width: 18px; height: 18px; color: #fff; stroke-width: 2; }
+
+.complaint-card-meta { flex: 1; min-width: 0; }
+.complaint-card-type { font-weight: 700; font-size: 14px; }
+.complaint-card-id   { font-size: 11.5px; color: var(--text-faint); margin-top: 2px; font-family: var(--font-mono); }
+
+.complaint-status-pill { flex: 0 0 auto; margin-top: 2px; }
+
+.complaint-card-body { margin-bottom: 14px; }
+.complaint-field-row {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 13px; color: var(--text-dim); margin-bottom: 5px;
+}
+.complaint-field-row .field-icon { width: 13px; height: 13px; flex: 0 0 13px; color: var(--primary); }
+.complaint-description {
+  font-size: 12.5px; color: var(--text-dim);
+  margin-top: 8px; padding-top: 8px;
+  border-top: 1px solid var(--border);
+  line-height: 1.5;
+}
+
+/* ── Form hero ── */
+.complaint-form-hero {
+  display: flex; align-items: center; gap: 14px;
+  padding: 18px 20px; border-radius: var(--r-lg);
+  background: linear-gradient(130deg, var(--primary), var(--accent));
+  color: #fff; margin-bottom: 4px;
+  position: relative; overflow: hidden;
+}
+.complaint-form-hero::after {
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.18), transparent);
+  transform: translateX(-100%); animation: shimmer 3.5s ease-in-out infinite;
+}
+.complaint-form-hero-icon {
+  width: 48px; height: 48px; border-radius: 50%; flex: 0 0 48px;
+  background: rgba(255,255,255,0.22); display: flex; align-items: center; justify-content: center;
+}
+.complaint-form-hero-icon i { width: 22px; height: 22px; color: #fff; }
+.complaint-form-hero-title { font-family: var(--font-display); font-weight: 700; font-size: 17px; }
+.complaint-form-hero-sub   { font-size: 12px; opacity: 0.85; margin-top: 2px; }
+
+/* ── Problem type chips grid ── */
+.problem-chip-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 9px; margin-bottom: 4px;
+}
+.problem-chip {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 12px 6px 10px;
+  background: var(--surface-2); border: 1.5px solid var(--border);
+  border-radius: var(--r-md); cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s, background 0.15s;
+  text-align: center; font-size: 11px; font-weight: 600; color: var(--text-dim);
+}
+.problem-chip:active { transform: scale(0.95); }
+.problem-chip-icon {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.problem-chip-icon i { width: 16px; height: 16px; color: var(--primary); stroke-width: 2; }
+.problem-chip.selected {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface-2));
+  color: var(--primary);
+}
+.problem-chip.selected .problem-chip-icon {
+  background: var(--primary);
+}
+.problem-chip.selected .problem-chip-icon i { color: #fff; }
+
+/* ── Form card / fields ── */
+.complaint-form-card { margin-bottom: 0; }
+.label-icon { width: 13px; height: 13px; display: inline-block; vertical-align: middle; margin-right: 4px; color: var(--primary); }
+.field label {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--text-faint); margin-bottom: 7px;
+}
+.field input, .field textarea, .field select {
+  width: 100%; background: var(--bg-alt);
+  border: 1.5px solid var(--border-strong); border-radius: var(--r-sm);
+  padding: 11px 14px; font-size: 14px; font-family: var(--font-body); color: var(--text);
+  outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.field input:focus, .field textarea:focus, .field select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+.field textarea { resize: vertical; min-height: 90px; }
+.field { margin-bottom: 14px; }
+
+/* ── Location options ── */
+.location-options { display: flex; flex-direction: column; gap: 10px; }
+.location-or { text-align: center; font-size: 11.5px; color: var(--text-faint); font-weight: 600; }
+
+.upload-well {
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
+  padding: 16px; border-radius: var(--r-md); text-align: center;
+  border: 1.5px dashed var(--border-strong); cursor: pointer;
+  background: var(--bg-alt); color: var(--text-faint); font-size: 13px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.upload-well i { width: 22px; height: 22px; }
+.upload-well:hover { border-color: var(--primary); color: var(--primary); }
+.upload-well.locating { border-color: var(--amber-600); color: var(--amber-600); animation: pulse-border 1.2s ease-in-out infinite; }
+.upload-well.located  { border-color: var(--accent);   color: var(--accent); border-style: solid; }
+
+@keyframes pulse-border {
+  0%, 100% { opacity: 1; } 50% { opacity: 0.6; }
+}
+
+/* ── Submit button ── */
+.complaint-submit-btn {
+  width: 100%; margin-top: 22px; padding: 15px;
+  font-size: 15px; border-radius: var(--r-md);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.complaint-note {
+  text-align: center; font-size: 11.5px; color: var(--text-faint);
+  margin: 8px 0 0; line-height: 1.5;
+}
+
+/* ── Timeline (shared) ── */
+.timeline { display: flex; align-items: flex-start; gap: 0; }
+.timeline-step { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
+.timeline-step + .timeline-step::before {
+  content: ''; position: absolute; top: 7px; left: calc(-50%);
+  width: 100%; height: 2px; background: var(--border-strong);
+}
+.timeline-step.done::before, .timeline-step.current::before { background: var(--primary); }
+.timeline-dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--border-strong); border: 2px solid var(--bg);
+  z-index: 1; transition: background 0.2s;
+}
+.timeline-step.done    .timeline-dot { background: var(--primary); }
+.timeline-step.current .timeline-dot { background: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 28%, transparent); }
+.timeline-title { font-size: 10px; color: var(--text-faint); margin-top: 5px; text-align: center; }
+.timeline-step.done    .timeline-title,
+.timeline-step.current .timeline-title { color: var(--primary); font-weight: 600; }
+

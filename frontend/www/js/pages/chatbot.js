@@ -5,6 +5,7 @@ window.Pages.chatbot = {
   suggestions: [
     'Nearest hospital to me', 'Next bus on route 12', 'Traffic near downtown',
     'Garbage collection schedule', 'Water supply timing today', 'Report an electricity fault',
+    'Companies handling waste collection', 'Best office for electricity complaints',
     'Government schemes for citizens', 'Tourist spots nearby', 'Emergency numbers',
   ],
 
@@ -16,7 +17,7 @@ window.Pages.chatbot = {
       <div class="chat-scroll" id="chat-scroll"></div>
       <div class="chat-suggestions" id="chat-suggestions"></div>
       <div class="chat-input-bar">
-        <input type="text" id="chat-input" placeholder="Ask anything about the city…" />
+        <input type="text" id="chat-input" placeholder="Ask anything about the city, companies, services…" />
         <button class="chat-send" id="chat-send"><i data-lucide="send"></i></button>
       </div>
     `;
